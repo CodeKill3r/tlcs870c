@@ -81,13 +81,13 @@ static int idaapi notify(processor_t::idp_notify msgid, ...)
       }
       break;
 
-	//case processor_t::oldfile:  // old file loaded
- //     {
- //       char buf[MAXSTR];
- //       if ( helper.supval(-1, buf, sizeof(buf)) > 0 )
- //         set_device_name(buf, IORESP_NONE);
- //     }
- //     break;
+	case processor_t::oldfile:  // old file loaded
+      {
+        char buf[MAXSTR];
+        if ( helper.supval(-1, buf, sizeof(buf)) > 0 )
+          set_device_name(buf, IORESP_NONE);
+      }
+      break;
 
      case processor_t::newprc:{
            char buf[MAXSTR];
@@ -255,7 +255,7 @@ processor_t LPH = {
   NULL,                         // Register descriptions
   NULL,                         // Pointer to CPU registers
   rVcs,rVds,
-  2,                            // size of a segment register
+  0,                            // size of a segment register
   rVcs,rVds,
   NULL,                         // No known code start sequences
   retcodes,                     // 'Return' instruction codes

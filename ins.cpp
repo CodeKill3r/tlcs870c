@@ -52,9 +52,9 @@ instruc_t Instructions[] = {
 { "DI",         0                               },
 
 { "JRS",        CF_USE1|CF_USE2|CF_JUMP         },      // always conditional
-{ "JR",         CF_USE1|CF_JUMP|CF_STOP         },
+{ "JR",         CF_USE1|        CF_JUMP|CF_STOP },
 { "JR",         CF_USE1|CF_USE2|CF_JUMP         },
-{ "JP",         CF_USE1|CF_JUMP|CF_STOP         },
+{ "JP",         CF_USE1|        CF_JUMP|CF_STOP },
 
 { "CALLV",      CF_USE1|CF_CALL                 },
 { "CALL",       CF_USE1|CF_CALL                 },

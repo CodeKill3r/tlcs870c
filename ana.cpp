@@ -6,6 +6,15 @@
 
 #include "tosh.hpp"
 
+// calc realtive address
+ea_t map_addr(ea_t base, int16 offs, char cmdsiz)
+{
+    int16 taddr;    //temp addr for 16bit calc
+    taddr=base+cmdsiz;
+    taddr+=offs;
+    return (ea_t) taddr;
+}
+
 //--------------------
 // function to fill the basic ALU functions
 inline void cmdFillAlu(uchar aidx, optype_t op1t, uint16 op1val, optype_t op2t, uint16 op2val, char dtype)
@@ -200,7 +209,8 @@ int decodeRegPrefix(uchar regIdx)   //ret 0 = OK   1=Err
             cmd.Op2.type = o_near;
             cmd.Op2.addr = ua_next_byte();
             cmd.Op2.addr |= ((code & 0x80)?0xFF00:0);
-            cmd.Op2.opcode_add = 3;
+			cmd.Op2.addr = map_addr(cmd.ea,cmd.Op2.addr,3);
+			cmd.Op2.dtyp = dt_code;
             break;
         case 0xD8:
             //PUSH gg
@@ -646,6 +656,8 @@ int idaapi T870C_ana(void)
     cmd.Op1.type = o_phrase;
     cmd.Op1.phrase = fVectAddr;
     cmd.Op1.addr = (code & 0x0F)<<1;
+	cmd.Op1.addr = map_addr(0xFFB0, cmd.Op1.addr, 0);
+	cmd.Op1.dtyp = dt_code;
     return cmd.size;
   }
   if (( (code & 0xF0) == 0x80) ||( (code & 0xF0) == 0x90))
@@ -656,7 +668,8 @@ int idaapi T870C_ana(void)
     cmd.Op1.phrase = fCnT;
     cmd.Op2.type = o_near;
     cmd.Op2.addr = (code & 0x1F) | ((code & 0x10)?0xFFF0:0); //sign extending
-    cmd.Op2.opcode_add = 2;
+	cmd.Op2.addr = map_addr(cmd.ea, cmd.Op2.addr, 2);
+	cmd.Op2.dtyp = dt_code;
     return cmd.size;
   }
   if (( (code & 0xF0) == 0xA0) ||( (code & 0xF0) == 0xB0))
@@ -667,7 +680,8 @@ int idaapi T870C_ana(void)
     cmd.Op1.phrase = fCnF;
     cmd.Op2.type = o_near;
     cmd.Op2.addr = (code & 0x1F) | ((code & 0x10)?0xFFF0:0);
-    cmd.Op2.opcode_add = 2;
+	cmd.Op2.addr = map_addr(cmd.ea, cmd.Op2.addr, 2);
+	cmd.Op2.dtyp = dt_code;
     return cmd.size;
   }
   
@@ -879,7 +893,7 @@ int idaapi T870C_ana(void)
         break;
     case 0x0E:
         //LD (x),A
-        cmd.itype = T870C_cmp;
+        cmd.itype = T870C_ld;
         cmd.Op1.type = o_mem;
         cmd.Op1.addr = ua_next_byte();
         cmd.Op2.type = o_reg;
@@ -1012,7 +1026,8 @@ int idaapi T870C_ana(void)
 		addr_tmp=ua_next_byte();
         cmd.Op2.addr = addr_tmp;
         cmd.Op2.addr |= ((addr_tmp & 0x80)?0xFF00:0);
-        cmd.Op2.opcode_add = 2;
+		cmd.Op2.addr = map_addr(cmd.ea, cmd.Op2.addr, 2);
+		cmd.Op2.dtyp = dt_code;
         break;
     case 0xF9:
         //LD RBS,0 or 1
@@ -1033,7 +1048,8 @@ int idaapi T870C_ana(void)
 		addr_tmp=ua_next_byte();
         cmd.Op1.addr = addr_tmp; 
         cmd.Op1.addr |= ((addr_tmp & 0x80)?0xFF00:0);
-        cmd.Op1.opcode_add = 2;
+		cmd.Op1.addr = map_addr(cmd.ea, cmd.Op1.addr, 2);
+		cmd.Op1.dtyp = dt_code;
         break;
     case 0xFD:
         //CALL mn

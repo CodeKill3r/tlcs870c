@@ -192,9 +192,9 @@ bool idaapi T870C_outop(op_t &x)
         {
           out_symbol('(');          
           //x.addr+=0xffb0;
-          v=map_addr(0xFFB0, (int16) x.addr, 0);
+          //v=map_addr(0xFFB0, (int16) x.addr, 0);
           //out_addr_tag(v);
-		  x.addr=v;
+		  //x.addr=v;
 		  //warning("callv out: %a: bad optype %a", cmd.ea, v);
           OutValue(x, OOF_ADDR|OOFS_NOSIGN|OOFW_16);
           out_symbol(')');        
@@ -202,15 +202,17 @@ bool idaapi T870C_outop(op_t &x)
         break;    
     // realtive jump
     case o_near:
-        v=map_addr(cmd.ip, (int16) x.addr, x.opcode_add);
+        //v=map_addr(cmd.ip, (int16) x.addr, x.opcode_add);
         //out_addr_tag(v);
 		//warning("near addr out: %a: bad optype %a", cmd.ea, v);
 		//if ( get_name_expr(cmd.ea+x.opcode_add, x.n, v, v, buf, sizeof(buf)) <= 0 )
-		x.addr=v;
+		//x.addr=v;
 		{
 			// now print the offset
+			//out_addr_tag(v);
+            //out_name_expr(x,v,x.addr);
 			OutValue(x, OOF_ADDR|OOFS_NOSIGN|OOFW_16);
-			QueueSet(Q_noName, cmd.ea);
+			//QueueSet(Q_noName, cmd.ea);
 		}
         break;
     case o_void:    // no operand
@@ -263,7 +265,7 @@ void idaapi T870C_header(void)
 }
 
 //--------------------------------------------------------------------------
-// enerate start of a segment
+// generate start of a segment
 void idaapi T870C_segstart(ea_t ea)
 {
   segment_t *Sarea = getseg(ea);

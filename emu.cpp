@@ -6,22 +6,12 @@
 
 #include "tosh.hpp"
 
-// calc realtive address
-ea_t map_addr(ea_t base, int16 offs, char cmdsiz)
-{
-    int16 taddr;    //temp addr for 16bit calc
-    taddr=base+cmdsiz;
-    taddr+=offs;
-    return (ea_t) taddr;
-}
-
 static bool flow;       // stop check
 //----------------------------------------------------------------------
 // put to use / modify operand
 static void TouchArg(op_t &x,int isAlt,int isload)
 {
-ea_t map_ea=map_addr(cmd.ip, (int16) x.addr, x.opcode_add);
-ea_t ea = x.addr; //toEA(codeSeg(map_ea,x.n), map_ea);
+ea_t ea = toEA(codeSeg(x.addr,x.n), x.addr); //toEA(codeSeg(map_ea,x.n), map_ea);
 switch ( x.type ) {
 // this part is not used!
 case o_void:  break;
@@ -35,8 +25,6 @@ case o_reg:           break;
 case o_phrase:                // 2 registers or indirect addressing
             if ( x.phrase==fVectAddr )
             {
-                map_ea=map_addr(0xFFB0, (int16) x.addr, 0);
-                ea = toEA(codeSeg(map_ea,x.n), map_ea);
                 ua_add_cref(x.offb,ea,fl_CF);
                 flow = func_does_return(ea);
             }
@@ -59,19 +47,29 @@ case o_imm:     // direct can not be changed
 case o_near:    // it's a call ? (Or jump)
             if ( InstrIsSet(cmd.itype,CF_CALL) ){
                     // put a link to the code
-                    ua_add_cref(x.offb,map_ea,fl_CN);
+                    ua_add_cref(x.offb,ea,fl_CN);
                     // a function without return ?
-                    flow = func_does_return(map_ea);
+                    flow = func_does_return(ea);
             }
-            else ua_add_cref(x.offb,map_ea,fl_JN);
+			else
+			{
+				ua_add_cref(x.offb,ea,fl_JN);
+				//add_cref(cmd.ea,ea,fl_JN);
+			}
         break;
 // far jump/call to absolute address
 case o_far:
             if ( InstrIsSet(cmd.itype,CF_CALL) ){
                     ua_add_cref(x.offb,ea,fl_CF);
+					//add_cref(cmd.ea,ea,fl_CF);
                     flow = func_does_return(ea);
             }
-            else ua_add_cref(x.offb,ea,fl_JF);
+            else
+			{
+				ua_add_cref(x.offb,ea,fl_JF);
+				//add_cref(cmd.ea,ea, fl_JF);
+			}
+
         break;
                 
 // reference memory
@@ -148,7 +146,7 @@ int idaapi T870C_emu(void)
   // a xref to the next instruction.
   // Thus we plan to analyze the next instruction.
 
-  if ( flow) ua_add_cref(0,cmd.ea+cmd.size,fl_F );
+  if (flow) ua_add_cref(0,cmd.ea+cmd.size,fl_F );
 
   return(1);
 }
