@@ -20,7 +20,7 @@ static const char *const RegNames[] =
         // 8 bit registers
         "A","W","C","B","E","D","L","H",
         // 16bit registers
-        "WA","BC","DE","HL","IX","IY","IZ","SP",
+        "WA","BC","DE","HL","IX","IY","SP",
 
         // virtual registers for code and data segments
         "cs","ds"
